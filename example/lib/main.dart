@@ -20,7 +20,8 @@ class MyApp extends StatelessWidget {
           child: Column(
             children: [
               StreamBuilder<bool?>(
-                stream: _nativeTimeZoneCheckerPlugin.timeZone,
+                stream: _nativeTimeZoneCheckerPlugin
+                    .watchTimeAndZoneAutomaticByNetwork,
                 builder: (context, snapshot) {
                   return Text('Running on: ${snapshot.data}\n');
                 },

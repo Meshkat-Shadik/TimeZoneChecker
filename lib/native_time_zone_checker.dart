@@ -18,11 +18,22 @@ abstract class _NativeTimeZoneCheckerPlatform extends PlatformInterface {
   /// Defaults to [MethodChannelNativeTimeZoneChecker].
   static _NativeTimeZoneCheckerPlatform get instance => _instance;
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<bool> getIsTimeSetToAutomaticByNetwork() {
+    throw UnimplementedError(
+        'getIsTimeSetToAutomatic() has not been implemented.');
   }
 
-  Stream<bool?> timeZone() {
+  Future<bool> getIsTimeZoneSetToAutomaticByNetwork() {
+    throw UnimplementedError(
+        'getIsTimeZoneSetToAutomatic() has not been implemented.');
+  }
+
+  Future<bool> getBothTimeAndZoneSetToAutomaticByNetwork() {
+    throw UnimplementedError(
+        'getIsTimeZoneSetToAutomaticByNetwork() has not been implemented.');
+  }
+
+  Stream<bool?> watchTimeAndZoneAutomaticByNetwork() {
     throw UnimplementedError('timeZone() has not been implemented.');
   }
 }
@@ -41,14 +52,28 @@ class _MethodChannelNativeTimeZoneChecker
   StreamSubscription? subscription;
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<bool> getIsTimeSetToAutomaticByNetwork() async {
+    final isTimeSetToAutomaticByNetwork =
+        await methodChannel.invokeMethod<bool>('getIsTimeSetToAutomatic');
+    return isTimeSetToAutomaticByNetwork!;
   }
 
   @override
-  Stream<bool?> timeZone() async* {
+  Future<bool> getIsTimeZoneSetToAutomaticByNetwork() async {
+    final isTimeZoneSetToAutomaticByNetwork =
+        await methodChannel.invokeMethod<bool>('getIsTimeZoneSetToAutomatic');
+    return isTimeZoneSetToAutomaticByNetwork!;
+  }
+
+  @override
+  Future<bool> getBothTimeAndZoneSetToAutomaticByNetwork() async {
+    final isBothTimeAndZoneSetToAutomaticByNetwork = await methodChannel
+        .invokeMethod<bool>('getBothTimeAndTimeZoneIsAutomatic');
+    return isBothTimeAndZoneSetToAutomaticByNetwork!;
+  }
+
+  @override
+  Stream<bool?> watchTimeAndZoneAutomaticByNetwork() async* {
     subscription = eventChannel.receiveBroadcastStream().listen((event) {
       _timeController.add(event);
     });
@@ -57,11 +82,23 @@ class _MethodChannelNativeTimeZoneChecker
 }
 
 class NativeTimeZoneChecker {
-  Future<String?> getPlatformVersion() {
-    return _NativeTimeZoneCheckerPlatform.instance.getPlatformVersion();
+  Future<bool> getIsTimeSetToAutomaticByNetwork() {
+    return _NativeTimeZoneCheckerPlatform.instance
+        .getIsTimeSetToAutomaticByNetwork();
   }
 
-  Stream<bool?> get timeZone async* {
-    yield* _NativeTimeZoneCheckerPlatform.instance.timeZone();
+  Future<bool> getIsTimeZoneSetToAutomaticByNetwork() {
+    return _NativeTimeZoneCheckerPlatform.instance
+        .getIsTimeZoneSetToAutomaticByNetwork();
+  }
+
+  Future<bool> getBothTimeAndZoneSetToAutomaticByNetwork() {
+    return _NativeTimeZoneCheckerPlatform.instance
+        .getBothTimeAndZoneSetToAutomaticByNetwork();
+  }
+
+  Stream<bool?> get watchTimeAndZoneAutomaticByNetwork async* {
+    yield* _NativeTimeZoneCheckerPlatform.instance
+        .watchTimeAndZoneAutomaticByNetwork();
   }
 }

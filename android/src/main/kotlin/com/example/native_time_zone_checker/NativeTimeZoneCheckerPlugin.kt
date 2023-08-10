@@ -41,20 +41,20 @@ class NativeTimeZoneCheckerPlugin: FlutterPlugin, MethodCallHandler, EventChanne
   //All the other times it is listening to the changes
   private val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
     override fun onChange(selfChange: Boolean) {
-      Log.d("MainActivity", "onChange")
+     // Log.d("MainActivity", "onChange")
       val autoTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        Log.d("MainActivity", "Ok Version 1 inside onChange")
+       // Log.d("MainActivity", "Ok Version 1 inside onChange")
         Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME)
       } else {
         Settings.System.getInt(contentResolver, Settings.System.AUTO_TIME)
       }
       val autoTimeZone = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-        Log.d("MainActivity", "Ok Version 2 inside onChange")
+       // Log.d("MainActivity", "Ok Version 2 inside onChange")
         Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME_ZONE)
       } else {
         Settings.System.getInt(contentResolver, Settings.System.AUTO_TIME_ZONE)
       }
-      Log.d("MainActivity", "autoTime: $autoTime, autoTimeZone: $autoTimeZone")
+     // Log.d("MainActivity", "autoTime: $autoTime, autoTimeZone: $autoTimeZone")
       val bothEnabled = autoTime == 1 && autoTimeZone == 1
       eventSink?.success(bothEnabled)
     }
@@ -69,9 +69,28 @@ class NativeTimeZoneCheckerPlugin: FlutterPlugin, MethodCallHandler, EventChanne
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
+    if(call.method == "getIsTimeSetToAutomatic")
+    {
+      val autoTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME)
+      } else {
+        Settings.System.getInt(contentResolver, Settings.System.AUTO_TIME)
+      }
+      result.success(autoTime==1)
+    }
+    else if(call.method == "getIsTimeZoneSetToAutomatic"){
+      val autoTimeZone = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        //Log.d("MainActivity", "Ok Version 2 inside onChange")
+        Settings.Global.getInt(contentResolver, Settings.Global.AUTO_TIME_ZONE)
+      } else {
+        Settings.System.getInt(contentResolver, Settings.System.AUTO_TIME_ZONE)
+      }
+      result.success(autoTimeZone==1)
+    }
+    else if(call.method == "getBothTimeAndTimeZoneIsAutomatic"){
+      result.success(checkAutoTimeSettings())
+    }
+    else {
       result.notImplemented()
     }
   }
@@ -82,10 +101,10 @@ class NativeTimeZoneCheckerPlugin: FlutterPlugin, MethodCallHandler, EventChanne
   }
 
   override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-    Log.d("MainActivity", "onListen")
+    //Log.d("MainActivity", "onListen")
     eventSink = events
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      Log.d("MainActivity", "Ok Version")
+      //Log.d("MainActivity", "Ok Version")
       val bothEnabled = checkAutoTimeSettings()
       eventSink?.success(bothEnabled)
       contentResolver.registerContentObserver(Settings.Global.CONTENT_URI, true, observer)
@@ -97,7 +116,7 @@ class NativeTimeZoneCheckerPlugin: FlutterPlugin, MethodCallHandler, EventChanne
   }
 
   override fun onCancel(arguments: Any?) {
-    Log.d("MainActivity", "onCancel")
+    //Log.d("MainActivity", "onCancel")
     contentResolver.unregisterContentObserver(observer)
     eventSink = null
   }
